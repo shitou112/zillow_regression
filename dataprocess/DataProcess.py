@@ -68,12 +68,14 @@ param_tests = {
     'min_child_samples': [5, 10, 20],
 }
 
-result_index = 1
+result_index = 0
 x_train = pd.read_csv('..\\data\\train_df.csv', low_memory=False)
 x_test = pd.read_csv("..\\data\\test_df"+str(result_index)+".csv", low_memory=False)
 y_train = pd.read_csv('E:\\kaggle\\zillow_new\\train_2016_v2.csv', parse_dates=['transactiondate'], low_memory=False)
 result = pd.DataFrame(np.zeros((x_test.shape[0], 7)), columns=['parcelid', '201610', '201611', '201612', '201710', '201711', '201712'])
+result['parcelid'] = x_test['parcelid'].values
 
+print(result.tail())
 print(x_train.shape)
 print(x_test.shape)
 # drop useless feature
@@ -102,7 +104,6 @@ x_train = x_train.loc[index, :]
 y_train = y_train.loc[index, :]
 
 
-
 x_train = x_train.reset_index()
 y_train = y_train.reset_index()
 x_train.drop(['index'], axis=1, inplace=True)
@@ -119,6 +120,7 @@ print(x_train.shape)
 # print(x_test.shape)
 x_train = x_train.append(x_test)
 
+del x_test
 gc.collect()
 
 
@@ -193,15 +195,9 @@ important_features = ['calculatedfinishedsquarefeet', 'taxamount',
                       'living_all_rate', 'room_num',
                       ]
 
-def yearbuilt_level(x):
-    if x <= 1960:
-        return 'before 1960'
-    else:
-        return 'now'
 
 for col in important_features:
     x_train = location.cityProcess(x_train, col, 'regionidzip')
-
 
 
 for col in x_train.columns:
@@ -230,6 +226,8 @@ x_train = x_train[: train_nums]
 x_train['transaction_month'] = y_train['transactiondate'].dt.month
 abs_month_avgs = x_train.groupby('transaction_month').agg(['mean'])['abs_logerror', 'mean'].values - x_train['abs_logerror'].mean()
 x_train.drop(['abs_logerror'], axis=1, inplace=True)
+x_test.drop(['abs_logerror'], axis=1, inplace=True)
+
 
 
 print(abs_month_avgs)
@@ -240,16 +238,12 @@ month_values = x_train['transaction_month'].values
 month_model = LinearRegression().fit(np.arange(4, 13, 1).reshape(-1, 1), abs_month_avgs[3:].reshape(-1 ,1))
 x_train['month_logerror_diff'] = month_model.predict(month_values.reshape(-1, 1))
 
+x_train = x_train.fillna(-1)
+x_train['logerror'] = y_train['logerror'].values
+x_train.to_csv('..\\data\\x_train.csv', index=False)
+x_train.drop(['logerror'], axis=1, inplace=True)
 
-print(x_train.head())
-x_test.to_csv('..\\data\\x_test_result'+str(result_index)+'.csv', index=False)
 
-print(x_train.shape)
-print(y_train.shape)
-print(x_test.shape)
-print(x_train.tail)
-print(y_train.tail)
-print(x_test.tail)
 # final_x['transaction_month'] = final_y['transactiondate'].dt.month
 # final_x['month_logerror_diff'] = month_model.predict(final_x['transaction_month'].values.reshape(-1,1))
 #
@@ -290,11 +284,13 @@ print('模型训练')
 #     y_value = y_train['logerror'] * mult
 
 # xgbtrain = xgb.DMatrix(data=x_train, label=y_train['logerror'])
-# xgb.cv(xgb_params, xgbtrain, num_boost_round=1000, verbose_eval=10)
+# cv_model = xgb.cv(xgb_params, xgbtrain, num_boost_round=1000, verbose_eval=10)
+# cv_model.nu
 # model = xgb.train(xgb_params, xgbtrain, num_boost_round=1000, verbose_eval=10)
 
 lgbtrain = lgb.Dataset(x_train, y_train['logerror'])
-lgb.cv(lgb_params, lgbtrain, num_boost_round=1000, verbose_eval=10, nfold=4)
+cv_model = lgb.cv(lgb_params, lgbtrain, num_boost_round=1000, verbose_eval=10, nfold=4)
+
 model = lgb.train(lgb_params, lgbtrain, num_boost_round=820, verbose_eval=10)
 # pred = model.predict(x_train)
 # predict = model.predict(final_x)
@@ -312,27 +308,30 @@ model = lgb.train(lgb_params, lgbtrain, num_boost_round=820, verbose_eval=10)
 # sample_submission = pd.read_csv('E:\\kaggle\\zillow_new\\sample_submission.csv', low_memory=False)
 # sample_submission = typeTrans(sample_submission)
 #
-gc.collect()
+
 
 
 folds = 20
 n = int(x_test.shape[0] / folds)
 
-
+# del x_train
+# gc.collect()
 #
-for month in [10, 11, 12]:
-    print('iteration: month is '+ str(month) +' ....')
-    x_test['month_logerror_diff'] = abs_month_avgs[month-1]
-    x_test['transaction_month'] = month
-    print(x_test.shape)
-
-    y_pred = model.predict(x_test)
-    print(y_pred.shape)
-    result['2016'+str(month)] = y_pred
-    result['2017'+str(month)] = y_pred
-
+# for month in [10, 11, 12]:
+#     print('iteration: month is '+ str(month) +' ....')
+#     x_test['transaction_month'] = month
+#     x_test['month_logerror_diff'] = month_model.predict(x_test['transaction_month'].values.reshape(-1, 1))
 #
-result.to_csv("result"+str(result_index)+".csv", index=False)
+#     x_test.to_csv('..\\data\\x_test_' +str(result_index)+'_'+ str(month) + '.csv', index=False)
+#     print(x_test.shape)
+#
+#     y_pred = model.predict(x_test)
+#     print(y_pred.shape)
+#     result['2016'+str(month)] = y_pred
+#     result['2017'+str(month)] = y_pred
+#
+# #
+# result.to_csv("result"+str(result_index)+".csv", index=False)
 print('Saving predictions...')
 
 

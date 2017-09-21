@@ -14,14 +14,16 @@ x_test = test.merge(properties, how='left', on='parcelid')
 x_test.drop(['201610', '201611', '201612', '201710', '201711', '201712'], axis=1, inplace=True)
 print(x_train.shape)
 print(x_test.shape)
+
 # write data ...
 x_train.to_csv('..\\data\\train_df.csv', index=False)
 
 test_data_num = x_test.shape[0]
 n_fold = 3
 n = test_data_num // n_fold
+print(n)
 for j in range(n_fold):
     if j < n_fold-1:
-        x_test.loc[j*n: (j+1)*n, :].to_csv('..\\data\\test_df'+str(j)+'.csv', index=False)
+        x_test.iloc[j*n: (j+1)*n, :].to_csv('..\\data\\test_df'+str(j)+'.csv', index=False)
     else:
-        x_test.loc[j*n:, :].to_csv('..\\data\\test_df'+str(j)+'.csv', index=False)
+        x_test.iloc[j*n: , :].to_csv('..\\data\\test_df'+str(j)+'.csv', index=False)

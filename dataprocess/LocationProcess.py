@@ -7,7 +7,7 @@ important_features = ['calculatedfinishedsquarefeet', 'taxamount', 'taxvaluedoll
                       'landtaxvaluedollarcnt']
 
 def cityProcess(x_train, attribute, groupAttr):
-    print(x_train.shape)
+
     map_value = x_train[[attribute, groupAttr]]\
         .groupby([groupAttr]).mean()
     key = map_value.index.values
@@ -21,7 +21,7 @@ def cityProcess(x_train, attribute, groupAttr):
     # map_value.columns = [groupAttr, attribute + '_' + groupAttr]
     # x_train = pd.merge(x_train, map_value, on=[groupAttr], how='left')
 
-    print(x_train.shape)
+
     return x_train
 
 def yearGroup(x_train, attribute):

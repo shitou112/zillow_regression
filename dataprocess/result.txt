@@ -26,3 +26,5 @@ kaggle代码lgb：cv_agg's l1: 0.0521138 + 0.00041593
 总结：
 1. 删除logerror异常点, 而不是修改异常点值
 2. finishedsquarefeet12属性值中含有大量平均值，可以去除此属性，保留calculatedfinishedsquarefeet即可
+
+java -Xmx12048m -jar StackNet.jar train task=regression sparse=true has_head=false output_name=datasettwo model=model2 pred_file=pred2.csv train_file=dataset2_train.txt test_file=dataset2_test.txt test_target=false params=dataset2_params.txt verbose=true threads=1 metric=mae stackdata=false seed=1 folds=4 bins=3

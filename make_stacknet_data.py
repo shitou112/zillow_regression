@@ -6,7 +6,7 @@ from sklearn.preprocessing import LabelEncoder
 from scipy.sparse import csr_matrix
 
 
-directory="E:\\kaggle\\zillow_new\\" # hodls the data
+directory="data\\" # hodls the data
 
 ## converts arrayo to sparse svmlight format
 def fromsparsetofile(filename, array, deli1=" ", deli2=":",ytarget=None):    
@@ -49,50 +49,32 @@ def dataset2():
     ##### RE-READ PROPERTIES FILE
     
     print( "\nRe-reading properties file ...")
-    properties = pd.read_csv(directory +'properties_2016.csv')
 
-    train = pd.read_csv(directory +"train_2016_v2.csv")      
+    # x_train = pd.read_csv(directory +"x_train.csv")
+    x_test = pd.read_csv(directory + "x_test_merge10.csv")
     ##### PROCESS DATA FOR XGBOOST
     
     print( "\nProcessing data for XGBoost ...")
-    for c in properties.columns:
-        properties[c]=properties[c].fillna(-1)
-        if properties[c].dtype == 'object':
-            lbl = LabelEncoder()
-            lbl.fit(list(properties[c].values))
-            properties[c] = lbl.transform(list(properties[c].values))
-    
-    train_df = train.merge(properties, how='left', on='parcelid')
-    
-    train_df["transactiondate"] = pd.to_datetime(train_df["transactiondate"])
-    train_df["Month"] = train_df["transactiondate"].dt.month
-    
-    x_train = train_df.drop(['parcelid', 'logerror','transactiondate'], axis=1)
-    x_test = properties.drop(['parcelid'], axis=1)
-    
-    x_test["transactiondate"] = '2016-07-01'
-    x_test["transactiondate"] = pd.to_datetime(x_test["transactiondate"])
-    x_test["Month"] = x_test["transactiondate"].dt.month #should use the most common training date 2016-10-01
-    x_test = x_test.drop(['transactiondate'], axis=1)
-    
+
+    x_test = x_test.fillna(-1)
+    # y_train = x_train["logerror"].values.astype(np.float32)
+    # x_train.drop(['logerror'], axis=1, inplace=True)
     # shape        
-    print('Shape train: {}\nShape test: {}'.format(x_train.shape, x_test.shape))
+    # print('Shape train: {}\nShape test: {}'.format(x_train.shape, x_test.shape))
     
     # drop out ouliers
-    train_df=train_df[ train_df.logerror > -0.4 ]
-    train_df=train_df[ train_df.logerror < 0.419 ]
-    x_train=train_df.drop(['parcelid', 'logerror','transactiondate'], axis=1)
-    y_train = train_df["logerror"].values.astype(np.float32)
-    x_train = x_train.values.astype(np.float32, copy=False)
+
+
+    # x_train = x_train.values.astype(np.float32, copy=False)
     x_test = x_test.values.astype(np.float32, copy=False)  
   
     print('After removing outliers:')     
-    print (" shapes of dataset 2 ", x_train.shape, y_train.shape, x_test.shape)
+    # print (" shapes of dataset 2 ", x_train.shape, y_train.shape, x_test.shape)
     
-    print (" printing %s " % ("dataset2_train.txt") )
-    fromsparsetofile("dataset2_train.txt", x_train, deli1=" ", deli2=":",ytarget=y_train)     
-    print (" printing %s " % ("dataset2_test.txt") )    
-    fromsparsetofile("dataset2_test.txt", x_test, deli1=" ", deli2=":",ytarget=None)         
+    print (" printing %s " % ("dataset_train_10.txt") )
+    # fromsparsetofile("dataset_train_10.txt", x_train, deli1=" ", deli2=":",ytarget=y_train)
+    print (" printing %s " % ("dataset_test_10.txt") )
+    fromsparsetofile("dataset_test_10.txt", x_test, deli1=" ", deli2=":",ytarget=None)
     print (" finished with daatset2 " )      
     return
  

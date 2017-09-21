@@ -1,11 +1,7 @@
 import pandas as pd
 import numpy as np
 
-a = pd.DataFrame(data=[[1,2,3.0], [2.0, 4, 5]], columns=['a', 'b', 'c'])
-print(a.dtypes)
-for i in a.columns:
-    if a[i].dtype == np.float64:
-        a[i] = a[i].astype(np.float16)
+a = pd.DataFrame(data=[[1,2,3.0], [2.0, 4, 5], [4,5,6]], columns=['a', 'b', 'c'])
+print(a.iloc[1:2, :])
 
-print(a[['a', 'b']].groupby('a').mean())
-print(a['a'].value_counts())
+# sample_submission = pd.read_csv('E:\\kaggle\\zillow_new\\sample_submission.csv', low_memory=False)
