@@ -1,0 +1,28 @@
+lgb_params = {
+    # 'num_boost_round': 1000,
+    'n_estimators': 500,
+    'objective': 'regression',
+    # 'metric': 'mae',
+    'max_depth': 5,
+    'num_leaves': 31,
+    'min_child_weight': 6,
+    'learning_rate': 0.1,
+    'subsample': 0.8,
+    'colsample_bytree': 0.8,
+    # 'verbose': 0,
+    'nthread': 4,
+    'seed': 2017,
+}
+
+结果是cv_agg's l1: 0.0521016 + 0.000406883
+[mean: -0.05244, std: 0.00114, params: {'min_child_samples': 5, 'min_child_weight': 2}, mean: -0.05243, std: 0.00114, params: {'min_child_samples': 5, 'min_child_weight': 6}, mean: -0.05239, std: 0.00115, params: {'min_child_samples': 5, 'min_child_weight': 10}, mean: -0.05239, std: 0.00115, params: {'min_child_samples': 10, 'min_child_weight': 2}, mean: -0.05239, std: 0.00115, params: {'min_child_samples': 10, 'min_child_weight': 6}, mean: -0.05239, std: 0.00115, params: {'min_child_samples': 10, 'min_child_weight': 10}, mean: -0.05235, std: 0.00117, params: {'min_child_samples': 20, 'min_child_weight': 2}, mean: -0.05235, std: 0.00117, params: {'min_child_samples': 20, 'min_child_weight': 6}, mean: -0.05235, std: 0.00117, params: {'min_child_samples': 20, 'min_child_weight': 10}]
+  DeprecationWarning)
+{'min_child_samples': 20, 'min_child_weight': 2}
+-0.0523488070545
+
+kaggle代码lgb：cv_agg's l1: 0.0521138 + 0.00041593
+
+最新结果： 0.0525350595297
+总结：
+1. 删除logerror异常点, 而不是修改异常点值
+2. finishedsquarefeet12属性值中含有大量平均值，可以去除此属性，保留calculatedfinishedsquarefeet即可
